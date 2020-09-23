@@ -6,8 +6,11 @@
 
 #include "Adafruit_SHTC3.h"
 #include <Wire.h>
+#include <WiFi.h>
 
 // Globals
+const char SSID[] = "Cisco04646";
+const char PASSWD[] = "AGr3atPa55phra53";
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
 
 float celsiusToFahrenheit(float tempC) {
@@ -15,10 +18,25 @@ float celsiusToFahrenheit(float tempC) {
 }
 
 void setup() {
+	// Establish serial connection
 	Serial.begin(115200);
-
 	while (!Serial)
 		delay(10);     // will pause Zero, Leonardo, etc until serial console opens
+
+	// Initialize wifi connection, don't proceed until successful
+	Serial.print("Attempting to connect to "); Serial.print(SSID); Serial.println(" ...");
+	WiFi.begin(SSID, PASSWD);
+	int counter = 0;
+	while (WiFi.status() != WL_CONNECTED) {
+		Serial.print(".. ");
+		if (++counter >= 12) {
+			Serial.println();
+			counter = 0;
+		}
+		delay(100);
+	}
+	if (counter == 0) Serial.println("Connection successful!");
+	else Serial.println("\nConnection successful!");
 
 //	Serial.println("SHTC3 test");
 //	if (! shtc3.begin()) {
