@@ -5,7 +5,7 @@
 */
 
 #include "Adafruit_SHTC3.h"
-#include "Wire.h"
+#include <Wire.h>
 
 // Globals
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
@@ -20,23 +20,23 @@ void setup() {
 	while (!Serial)
 		delay(10);     // will pause Zero, Leonardo, etc until serial console opens
 
-	Serial.println("SHTC3 test");
-	if (! shtc3.begin()) {
-		Serial.println("Couldn't find SHTC3");
-		while (1) delay(1);
-	}
-	Serial.println("Found SHTC3 sensor");
+//	Serial.println("SHTC3 test");
+//	if (! shtc3.begin()) {
+//		Serial.println("Couldn't find SHTC3");
+//		while (1) delay(1);
+//	}
+//	Serial.println("Found SHTC3 sensor");
 }
 
 void loop() {
-	sensors_event_t humidity, temp;
-
-	shtc3.getEvent(&humidity, &temp);// populate temp and humidity objects with fresh data
-
-	Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.println(" degrees C");
-	Serial.print("Temperature: "); Serial.print(celsiusToFahrenheit(temp.temperature)); Serial.println(" degrees F");
-	Serial.print("Humidity:    "); Serial.print(humidity.relative_humidity); Serial.println(" % rH");
-	Serial.println();	// Just to space out the measurements for reading at a glance
-
-	delay(1000);
+//	sensors_event_t humidity, temp;
+//
+//	shtc3.getEvent(&humidity, &temp);// populate temp and humidity objects with fresh data
+//
+//	Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.println(" degrees C");
+//	Serial.print("Temperature: "); Serial.print(celsiusToFahrenheit(temp.temperature)); Serial.println(" degrees F");
+//	Serial.print("Humidity:    "); Serial.print(humidity.relative_humidity); Serial.println(" % rH");
+//	Serial.println();	// Just to space out the measurements for reading at a glance
+//
+//	delay(1000);
 }
