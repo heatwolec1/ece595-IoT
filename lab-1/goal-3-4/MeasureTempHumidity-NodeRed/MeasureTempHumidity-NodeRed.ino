@@ -10,7 +10,9 @@
 
 // Globals
 const char SSID[] = "Cisco04646";
-const char PASSWD[] = "AGr3atPa55phra53";
+const char PASSWD[] = "";	// TODO: DELETE THE PASSWORD BEFORE COMMITTING!!
+WiFiClient esp32Client;
+char url[] = "google.com";
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
 
 float celsiusToFahrenheit(float tempC) {
@@ -19,7 +21,7 @@ float celsiusToFahrenheit(float tempC) {
 
 void setup() {
 	// Establish serial connection
-	Serial.begin(115200);
+	Serial.begin(19200);
 	while (!Serial)
 		delay(10);     // will pause Zero, Leonardo, etc until serial console opens
 
@@ -37,6 +39,23 @@ void setup() {
 	}
 	if (counter == 0) Serial.println("Connection successful!");
 	else Serial.println("\nConnection successful!");
+
+	// Connect to a server
+	Serial.print("\nAttempting to connect to "); Serial.print(url); Serial.println(" ...");
+	esp32Client.connect(url, 80);
+	if (esp32Client.connected()) {
+		Serial.print("Connected to "); Serial.println(url);
+		// make request
+		esp32Client.println("GET /search?q=arduino HTTP/1.0");	// TODO: look up how to format HTTP requests
+		esp32Client.println();
+		while (esp32Client.available()) {
+			Serial.print(esp32Client.read());
+		}
+	}
+
+	// Disconnect from the server
+	esp32Client.stop();
+	Serial.print("\nDisconnected from "); Serial.println(url);
 
 //	Serial.println("SHTC3 test");
 //	if (! shtc3.begin()) {
