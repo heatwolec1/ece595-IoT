@@ -1,12 +1,17 @@
 /*
  * This code is nearly identical to the example code provided by Adafruit for the
- * SHTC3 sensor. My modications include printing the temperature in Fahrenheit
- * and reformatting the text being printed to the serial monitor.
+ * SHTC3 sensor. My modications include printing the temperature in Fahrenheit,
+ * reformatting the text being printed to serial, and replacing the delay function
+ * calls with system time differences.
+ *
+ * Rather than displaying the data on the Arduino serial monitor, I will be using
+ * Node-Red to listen for and display the data.
 */
 
 #include "Adafruit_SHTC3.h"
 #include "Wire.h"
 
+// Globals
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
 
 float celsiusToFahrenheit(float tempC) {
