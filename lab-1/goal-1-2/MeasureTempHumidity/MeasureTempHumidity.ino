@@ -32,6 +32,8 @@ void setup() {
 void loop() {
 	curMillis = millis();
 	if (curMillis-prevMillis >= 1000) {
+		prevMillis = curMillis;	// update timer check value
+
 		sensors_event_t humidity, temp;
 
 		shtc3.getEvent(&humidity, &temp);// populate temp and humidity objects with fresh data
