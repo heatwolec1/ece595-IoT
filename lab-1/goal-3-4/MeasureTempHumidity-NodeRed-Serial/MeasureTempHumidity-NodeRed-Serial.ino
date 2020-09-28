@@ -37,13 +37,15 @@ void setup() {
 void loop() {
 	curMillis = millis();
 	if (curMillis-prevMillis >= 1000) {
+		prevMillis = curMillis;
+
 		sensors_event_t humidity, temp;
 
-		shtc3.getEvent(&humidity, &temp);// populate temp and humidity objects with fresh data
+		shtc3.getEvent(&humidity, &temp);	// populate temp and humidity objects with fresh data
 
 		Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.println(" degrees C");
 		Serial.print("Temperature: "); Serial.print(celsiusToFahrenheit(temp.temperature)); Serial.println(" degrees F");
-		Serial.print("Humidity:    "); Serial.print(humidity.relative_humidity); Serial.println(" % rH");
-		Serial.println();	// Just to space out the measurements for reading at a glance
+		Serial.print("Humidity: "); Serial.print(humidity.relative_humidity); Serial.println(" % rH");
+		Serial.print("\r");	// used to separate messages in node-red
 	}
 }
