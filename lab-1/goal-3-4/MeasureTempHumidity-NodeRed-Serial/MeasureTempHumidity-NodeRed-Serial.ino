@@ -43,9 +43,9 @@ void loop() {
 
 		shtc3.getEvent(&humidity, &temp);	// populate temp and humidity objects with fresh data
 
-		Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.println(" degrees C");
-		Serial.print("Temperature: "); Serial.print(celsiusToFahrenheit(temp.temperature)); Serial.println(" degrees F");
-		Serial.print("Humidity: "); Serial.print(humidity.relative_humidity); Serial.println(" % rH");
+		Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.print(" degrees C\n");
+		Serial.print("Temperature: "); Serial.print(celsiusToFahrenheit(temp.temperature)); Serial.print(" degrees F\n");
+		Serial.print("Humidity: "); Serial.print(humidity.relative_humidity); Serial.print(" % rH\n");
 		Serial.print("\r");	// used to separate messages in node-red
 	}
 }
