@@ -51,7 +51,7 @@
         "rts": "none",
         "cts": "none",
         "dsr": "none",
-        "newline": "\\n",
+        "newline": "\\r",
         "bin": "false",
         "out": "char",
         "addchar": "",
