@@ -5,7 +5,10 @@
  * calls with system time differences.
  *
  * Rather than displaying the data on the Arduino serial monitor, I will be using
- * Node-Red to listen for and display the data.
+ * Node-RED to listen for and display the data.
+ *
+ * ALL MESSAGES BEING SENT OUT OVER SERIAL SHOULD HAVE A "#" AS THE FIRST CHARACTER
+ * OF THE LINE UNLESS THE LINE CONTAINS SENSOR DATA!!!
 */
 
 #include "Adafruit_SHTC3.h"
@@ -28,14 +31,17 @@ void setup() {
 	Serial.begin(115200);
 	while (!Serial)
 		delay(10);     // 10 ms is short enough that delay function isn't problematic
-	Serial.print("SHTC3 data logging\n");
+	Serial.print("# SHTC3 data logging\n");
 
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
 	if (! shtc3.begin()) {
-		Serial.print("Couldn't find SHTC3\n");
+		Serial.print("# Couldn't find SHTC3\n");
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
+
+	// Print out the CSV logging format
+	Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
 }
 
 void loop() {
