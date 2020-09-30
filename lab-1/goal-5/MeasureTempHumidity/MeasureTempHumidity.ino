@@ -28,12 +28,12 @@ void setup() {
 	Serial.begin(115200);
 	while (!Serial)
 		delay(10);     // 10 ms is short enough that delay function isn't problematic
-	Serial.println("SHTC3 data logging");
+	Serial.print("SHTC3 data logging\n");
 
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
 	if (! shtc3.begin()) {
-		Serial.println("Couldn't find SHTC3");
+		Serial.print("Couldn't find SHTC3\n");
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
 }
@@ -53,3 +53,4 @@ void loop() {
 		Serial.print("\r");	// used to separate messages in node-red
 	}
 }
+
