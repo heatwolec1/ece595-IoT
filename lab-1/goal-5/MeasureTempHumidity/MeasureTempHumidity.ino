@@ -20,18 +20,22 @@ float celsiusToFahrenheit(float tempC) {
 }
 
 void setup() {
+	// Initialize timer check value
 	prevMillis = 0;
 
+	// Try to open a serial connection
+	// don't proceed until it is successful
 	Serial.begin(115200);
 	while (!Serial)
 		delay(10);     // 10 ms is short enough that delay function isn't problematic
+	Serial.println("SHTC3 data logging");
 
-	Serial.println("SHTC3 test");
+	// Try to connect to the SHTC3 sensor
+	// don't proceed unless it is successful
 	if (! shtc3.begin()) {
 		Serial.println("Couldn't find SHTC3");
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
-	Serial.println("Found SHTC3 sensor");
 }
 
 void loop() {
