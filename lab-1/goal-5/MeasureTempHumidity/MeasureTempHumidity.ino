@@ -15,15 +15,17 @@
 #include "Wire.h"
 
 // Globals
-Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();
-unsigned long prevMillis, curMillis;
+Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
+unsigned long prevMillis, curMillis;		// timer values for creating delays
+sensors_event_t humidity, temp;				// sensor value objects
+String csvOutput = "";						// final data output
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
 }
 
 void setup() {
-	// Initialize timer check value
+	// Initialize timer check previous value
 	prevMillis = 0;
 
 	// Try to open a serial connection
@@ -45,18 +47,21 @@ void setup() {
 }
 
 void loop() {
+	// Update timer check current value
 	curMillis = millis();
 	if (curMillis-prevMillis >= 1000) {
+		// Update timer check previous value
 		prevMillis = curMillis;
 
-		sensors_event_t humidity, temp;
+		// Read in fresh data from the sensor
+		shtc3.getEvent(&humidity, &temp);
 
-		shtc3.getEvent(&humidity, &temp);	// populate temp and humidity objects with fresh data
-
-		Serial.print("Temperature: "); Serial.print(temp.temperature); Serial.print(" degrees C\n");
-		Serial.print("Temperature: "); Serial.print(celsiusToFahrenheit(temp.temperature)); Serial.print(" degrees F\n");
-		Serial.print("Humidity: "); Serial.print(humidity.relative_humidity); Serial.print(" % rH\n");
-		Serial.print("\r");	// used to separate messages in node-red
+		// Output the sensor readings in the CSV format
+		csvOutput = String(temp.temperature, 2) + ","
+			+ String(celsiusToFahrenheit(temp.temperature), 2) + ","
+			+ String(humidity.relative_humidity, 2) + "\n";
+		Serial.print(csvOutput);
+		Serial.print("\r");	// carriage return used to separate messages in node-red
 	}
 }
 
