@@ -61,7 +61,6 @@ void loop() {
 			+ String(celsiusToFahrenheit(temp.temperature), 2) + ","
 			+ String(humidity.relative_humidity, 2) + "\n";
 		Serial.print(csvOutput);
-		Serial.print("\r");	// carriage return used to separate messages in node-red
 	}
 }
 
