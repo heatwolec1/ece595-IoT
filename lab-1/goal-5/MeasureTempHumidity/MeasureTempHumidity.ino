@@ -42,7 +42,7 @@ void setup() {
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
 
-	// Print out the CSV logging format
+	// Print out the CSV logging format (timestamps will be added in Node-RED)
 	Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
 }
 
