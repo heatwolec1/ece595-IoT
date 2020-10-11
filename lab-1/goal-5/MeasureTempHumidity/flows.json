@@ -1,0 +1,324 @@
+[
+    {
+        "id": "182124df.7656db",
+        "type": "tab",
+        "label": "MeasureTempHumidity-NodeRed-Serial",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "87b62170.b64d68",
+        "type": "serial in",
+        "z": "182124df.7656db",
+        "name": "HUZZAH32 Serial",
+        "serial": "f1fe41a6.09e8",
+        "x": 290,
+        "y": 200,
+        "wires": [
+            [
+                "167bfca5.8fe23b"
+            ]
+        ]
+    },
+    {
+        "id": "9ff82c92.0b12b",
+        "type": "ui_gauge",
+        "z": "182124df.7656db",
+        "name": "Humidity Gauge",
+        "group": "d3057715.3cde68",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "donut",
+        "title": "",
+        "label": "% rH",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#ca3838",
+            "#00b500",
+            "#ca3838"
+        ],
+        "seg1": "45",
+        "seg2": "65",
+        "x": 960,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "32357f90.44d8e8",
+        "type": "ui_gauge",
+        "z": "182124df.7656db",
+        "name": "Temp C Gauge",
+        "group": "b2d0e1e5.d109e8",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "",
+        "label": "degrees C",
+        "format": "{{value}}",
+        "min": "-18",
+        "max": "45",
+        "colors": [
+            "#50a3ed",
+            "#00b500",
+            "#ca3838"
+        ],
+        "seg1": "10",
+        "seg2": "26.67",
+        "x": 960,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "2c0cd65b.5c586a",
+        "type": "ui_gauge",
+        "z": "182124df.7656db",
+        "name": "Temp F Gauge",
+        "group": "b2d0e1e5.d109e8",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "",
+        "label": "degrees F",
+        "format": "{{value}}",
+        "min": "-0.4",
+        "max": "113",
+        "colors": [
+            "#50a3ed",
+            "#00b500",
+            "#ca3838"
+        ],
+        "seg1": "50",
+        "seg2": "80",
+        "x": 960,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "c8fd1555.b6831",
+        "type": "switch",
+        "z": "182124df.7656db",
+        "name": "Humidity Switch",
+        "property": "key",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "humidity",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 1,
+        "x": 780,
+        "y": 400,
+        "wires": [
+            [
+                "9ff82c92.0b12b"
+            ]
+        ]
+    },
+    {
+        "id": "5af03df9.b9de8c",
+        "type": "switch",
+        "z": "182124df.7656db",
+        "name": "Temp C Switch",
+        "property": "key",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "temp_c",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 1,
+        "x": 780,
+        "y": 320,
+        "wires": [
+            [
+                "32357f90.44d8e8"
+            ]
+        ]
+    },
+    {
+        "id": "f04a3fce.cf4398",
+        "type": "switch",
+        "z": "182124df.7656db",
+        "name": "Temp F Switch",
+        "property": "key",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "temp_f",
+                "vt": "str"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 1,
+        "x": 780,
+        "y": 360,
+        "wires": [
+            [
+                "2c0cd65b.5c586a"
+            ]
+        ]
+    },
+    {
+        "id": "e6c8d0f4.0755b8",
+        "type": "debug",
+        "z": "182124df.7656db",
+        "name": "Output Tester",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "78b3e1ab.1c5318",
+        "type": "file",
+        "z": "182124df.7656db",
+        "name": "Temp/Humidity Log File",
+        "filename": "/home/cory/ece595/new-lab/lab-1/goal-5/temperature-humidity.csv",
+        "appendNewline": false,
+        "createDir": false,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 510,
+        "y": 280,
+        "wires": [
+            [
+                "26e1094b.a75bee"
+            ]
+        ]
+    },
+    {
+        "id": "26e1094b.a75bee",
+        "type": "csv",
+        "z": "182124df.7656db",
+        "name": "CSV Message Parser",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\n",
+        "temp": "YMD_HMS,temp_c,temp_f,humidity",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 340,
+        "y": 360,
+        "wires": [
+            [
+                "96613ce5.8797c8"
+            ]
+        ]
+    },
+    {
+        "id": "96613ce5.8797c8",
+        "type": "split",
+        "z": "182124df.7656db",
+        "name": "Object Splitter",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "key",
+        "x": 560,
+        "y": 360,
+        "wires": [
+            [
+                "5af03df9.b9de8c",
+                "f04a3fce.cf4398",
+                "c8fd1555.b6831"
+            ]
+        ]
+    },
+    {
+        "id": "167bfca5.8fe23b",
+        "type": "function",
+        "z": "182124df.7656db",
+        "name": "Add Timestamp",
+        "func": "const currentDate = new Date(); // date object representing current date and time\n\nconst csvSensorData = msg.payload;  // incoming message contains the sensor data in csv format\n\nlet month = currentDate.getMonth() + 1;\nif (month < 10) {\n    month = \"0\" + month;\n}\nlet date = currentDate.getDate();\nif (date < 10) {\n    date = \"0\" + date;\n}\n\nlet hour = currentDate.getHours()\nif (hour < 10) {\n    hour = \"0\" + hour;\n}\nlet minute = currentDate.getMinutes()\nif (minute < 10) {\n    minute = \"0\" + minute;\n}\nlet second = currentDate.getSeconds()\nif (second < 10) {\n    second = \"0\" + second;\n}\n\nconst csvTimestampedData = { payload: \n                            currentDate.getFullYear() +  // year: 4-digit format\n                            \"-\" + month +                // month: in range 01-12\n                            \"-\" + date +                 // day: in range 01-31\n                            \" \" + hour +                 // hour: in range 00-23\n                            \":\" + minute +               // minute: in range 00-59\n                            \":\" + second +               // second: in range 00-59\n                            \",\" + csvSensorData };       // the original sensor data csv\n\nreturn csvTimestampedData;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 300,
+        "y": 280,
+        "wires": [
+            [
+                "78b3e1ab.1c5318"
+            ]
+        ]
+    },
+    {
+        "id": "f1fe41a6.09e8",
+        "type": "serial-port",
+        "z": "",
+        "serialport": "/dev/ttyUSB0",
+        "serialbaud": "115200",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "",
+        "responsetimeout": "10000"
+    },
+    {
+        "id": "d3057715.3cde68",
+        "type": "ui_group",
+        "z": "",
+        "name": "Humidity",
+        "tab": "2c56341.6c45ecc",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "b2d0e1e5.d109e8",
+        "type": "ui_group",
+        "z": "",
+        "name": "Temperature",
+        "tab": "2c56341.6c45ecc",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false
+    },
+    {
+        "id": "2c56341.6c45ecc",
+        "type": "ui_tab",
+        "z": "",
+        "name": "SHTC3 Data",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
