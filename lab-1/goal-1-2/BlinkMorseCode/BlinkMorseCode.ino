@@ -8,15 +8,16 @@
 */
 
 #define TIME_UNIT 200	// define the Morse code unit of time [ms]
+#define LED_PIN   LED_BUILTIN
 
 String message = "hello world";	// Insert the message to blink here
 boolean validMessage = true;	// flag for checking if the message can be blinked
 
 void dot(boolean finalPart=false) {
 	// A dot is 1 unit long
-	digitalWrite(LED_BUILTIN, HIGH);
+	digitalWrite(LED_PIN, HIGH);
 	delay(TIME_UNIT);
-	digitalWrite(LED_BUILTIN, LOW);
+	digitalWrite(LED_PIN, LOW);
 
 	// Pause for 1 unit between parts, 3 units between letters
 	if (finalPart) delay(3*TIME_UNIT);
@@ -25,9 +26,9 @@ void dot(boolean finalPart=false) {
 
 void dash(boolean finalPart=false) {
 	// A dash is 3 unit long
-	digitalWrite(LED_BUILTIN, HIGH);
+	digitalWrite(LED_PIN, HIGH);
 	delay(3*TIME_UNIT);
-	digitalWrite(LED_BUILTIN, LOW);
+	digitalWrite(LED_PIN, LOW);
 
 	// Pause for 1 unit between parts, 3 units between letters
 	if (finalPart) delay(3*TIME_UNIT);
@@ -67,15 +68,15 @@ void blinkLetter(char letter) {
 }
 
 void invalidMessageHandler(int blinkTime=50) {
-	digitalWrite(LED_BUILTIN, HIGH);
+	digitalWrite(LED_PIN, HIGH);
 	delay(blinkTime);
-	digitalWrite(LED_BUILTIN, LOW);
+	digitalWrite(LED_PIN, LOW);
 	delay(blinkTime);
 }
 
 void setup() {
 	// Use the built-in LED for simplicity
-	pinMode(LED_BUILTIN, OUTPUT);
+	pinMode(LED_PIN, OUTPUT);
 
 	// Check the message for invalid characters (only lowercase letters are valid)
 	message.toLowerCase();	// Morse code can't show case, so make everything lower
