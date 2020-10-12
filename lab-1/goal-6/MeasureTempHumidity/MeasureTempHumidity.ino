@@ -63,10 +63,10 @@ void setup() {
 
 	// Try to open a serial connection
 	// don't proceed until it is successful
-	Serial.begin(115200);
-	while (!Serial)
-		delay(10);     // 10 ms is short enough that delay function isn't problematic
-	Serial.print("# SHTC3 data logging\n");
+//	Serial.begin(115200);
+//	while (!Serial)
+//		delay(10);     // 10 ms is short enough that delay function isn't problematic
+//	Serial.print("# SHTC3 data logging\n");
 
 	// Try to open a wifi connection
 	// don't proceed until it is successful
@@ -82,12 +82,12 @@ void setup() {
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
 	if (! shtc3.begin()) {
-		Serial.print("# Couldn't find SHTC3\n");
+		//Serial.print("# Couldn't find SHTC3\n");
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
 
 	// Print out the CSV logging format (timestamps will be added in Node-RED)
-	Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
+	//Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
 }
 
 void loop() {
