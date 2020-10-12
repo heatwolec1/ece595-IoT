@@ -68,26 +68,51 @@ void setup() {
 //		delay(10);     // 10 ms is short enough that delay function isn't problematic
 //	Serial.print("# SHTC3 data logging\n");
 
+	// Initialize the display
+	if (!display.begin(SSD1306_SWITCHCAPVCC)) fatalHandler();
+	display.clearDisplay(); display.display();
+	display.setTextSize(1);
+	display.setTextColor(SSD1306_WHITE);
+	display.setCursor(0, 0);
+	display.cp437(true);
+
 	// Try to open a wifi connection
 	// don't proceed until it is successful
 	if (!WiFi.config(local_IP, gateway, subnet)) fatalHandler();
+	display.println(F("Connecting to:"));
+	display.print(F("    ")); display.print(F(NETWORK_SSID));
+	display.display();
 	WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
 	while (WiFi.status() != WL_CONNECTED) {
-		delay(10);     // 10 ms is short enough that delay function isn't problematic
+		delay(500);
+		display.print(F("."));
+		display.display();
 	}
 
+	// Once connected, display connection info
+	display.clearDisplay(); display.setCursor(0, 0);
+	display.println(F("WiFi connected!"));
+	display.println(F("IP address:"));
+	display.print(F("    ")); display.println(WiFi.localIP());
+	display.display();
+
 	// Open UDP transfer buffer
-	udp.begin(local_IP, NODE_RED_HOST_PORT);
+	udp.begin(WiFi.localIP(), NODE_RED_HOST_PORT);
 
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
 	if (! shtc3.begin()) {
 		//Serial.print("# Couldn't find SHTC3\n");
+		display.println("Couldn't find SHTC3");
+		display.display();
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
 
 	// Print out the CSV logging format (timestamps will be added in Node-RED)
 	//Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
+	display.println("CSV format:");
+	display.print(F("    ")); display.println("tempC,tempF,humidity");
+	display.display();
 }
 
 void loop() {
