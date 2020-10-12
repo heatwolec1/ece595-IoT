@@ -18,7 +18,7 @@
 #include "Adafruit_SSD1306.h"
 #include "SPI.h"
 #include "WiFi.h"
-#include "WiFiUdp.h"
+//#include "WiFiUdp.h"
 #include "Wire.h"
 
 // Globals
@@ -30,7 +30,7 @@ IPAddress NODE_RED_HOST_IP(192, 168, 1, 112);	// IP address of the Node-RED serv
 IPAddress local_IP(192, 168, 1, 140);			// IP address of the microcontroller
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
-WiFiUDP udp;	// the UDP library class object
+//WiFiUDP udp;	// the UDP library class object
 WiFiClient client;	// client object to connect to adafruit's MQTT server
 
 // OLED screen
@@ -112,7 +112,7 @@ void setup() {
 	display.display();
 
 	// Open UDP transfer buffer
-	udp.begin(WiFi.localIP(), NODE_RED_HOST_PORT);
+	//udp.begin(WiFi.localIP(), NODE_RED_HOST_PORT);
 
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
@@ -149,12 +149,12 @@ void loop() {
 			+ String(humidity.relative_humidity, 2);
 
 		// If there is a wifi connection, send the data in UDP packets
-		if (WiFi.status() == WL_CONNECTED) {
-			csvOutput.toCharArray(csvOutputChar, csvOutput.length());
-			udp.beginPacket(NODE_RED_HOST_IP, NODE_RED_HOST_PORT);
-			udp.printf(csvOutputChar);
-			udp.endPacket();
-		}
+//		if (WiFi.status() == WL_CONNECTED) {
+//			csvOutput.toCharArray(csvOutputChar, csvOutput.length());
+//			udp.beginPacket(NODE_RED_HOST_IP, NODE_RED_HOST_PORT);
+//			udp.printf(csvOutputChar);
+//			udp.endPacket();
+//		}
 
 		// Publish sensor data to the Adafruit MQTT server
 		temperatureC.publish(temp.temperature);
