@@ -82,14 +82,11 @@ void loop() {
 
 		// Read in fresh data from the sensor
 		shtc3.getEvent(&humidity, &temp);
-
-		// Output the sensor readings in the CSV format
 		csvOutput = String(temp.temperature, 2) + ","
 			+ String(celsiusToFahrenheit(temp.temperature), 2) + ","
 			+ String(humidity.relative_humidity, 2);
-		Serial.print(csvOutput + "\n");
 
-		// If there is a wifi connection, send the data wirelessly also
+		// If there is a wifi connection, send the data in UDP packets
 		if (WiFi.status() == WL_CONNECTED) {
 			csvOutput.toCharArray(csvOutputChar, csvOutput.length());
 			udp.beginPacket(NODE_RED_HOST_IP, NODE_RED_HOST_PORT);
