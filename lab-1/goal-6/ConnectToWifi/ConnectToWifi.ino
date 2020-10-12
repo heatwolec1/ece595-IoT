@@ -12,7 +12,7 @@
 
 // Wifi globals
 #define NETWORK_SSID     "Cisco04646"
-#define NETWORK_PASSWORD "your_network_password"
+#define NETWORK_PASSWORD "your_password_here"
 IPAddress local_IP(192, 168, 1, 140);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
@@ -34,24 +34,33 @@ void setup() {
 
 	// Initialize the display
 	if (!display.begin(SSD1306_SWITCHCAPVCC)) fatalHandler();
-	display.clearDisplay();
-	display.setTextSize(2);
+	display.clearDisplay(); display.display();
+	display.setTextSize(1);
 	display.setTextColor(SSD1306_WHITE);
 	display.setCursor(0, 0);
 	display.cp437(true);
+
+	// Initialize wifi connection
+	if (!WiFi.config(local_IP, gateway, subnet)) fatalHandler();
+	display.println(F("Connecting to:"));
+	display.print(F("    ")); display.print(F(NETWORK_SSID));
+	display.display();
+	WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(500);
+		display.print(F("."));
+		display.display();
+	}
+
+	// Once connected, display connection info
+	display.clearDisplay(); display.setCursor(0, 0);
+	display.println(F("WiFi connected!"));
+	display.println(F("IP address:"));
+	display.print(F("    ")); display.println(WiFi.localIP());
+	display.display();
 }
 
 void loop() {
-	// do a quick screen test
-	for (int16_t row=0; row<SCREEN_HEIGHT; row=row+2) {
-		for (int16_t column=0; column<SCREEN_WIDTH; column=column+2) {
-			display.drawPixel(column, row, SSD1306_WHITE);
-			display.display();
-			delay(50);
-		}
-	}
-	display.clearDisplay();
-	delay(1000);
 }
 
 void fatalHandler() {
