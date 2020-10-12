@@ -27,9 +27,6 @@
 #define NETWORK_PASSWORD ""
 #define NODE_RED_HOST_PORT 12345				// Port on Node-RED server listening for messages
 //IPAddress NODE_RED_HOST_IP(192, 168, 1, 112);	// IP address of the Node-RED server
-//IPAddress local_IP(192, 168, 1, 140);			// IP address of the microcontroller
-//IPAddress gateway(192, 168, 1, 1);
-//IPAddress subnet(255, 255, 255, 0);
 //WiFiUDP udp;	// the UDP library class object
 WiFiClient client;	// client object to connect to adafruit's MQTT server
 
@@ -93,7 +90,6 @@ void setup() {
 
 	// Try to open a wifi connection
 	// don't proceed until it is successful
-	//if (!WiFi.config(local_IP, gateway, subnet)) fatalHandler();
 	display.println(F("Connecting to:"));
 	display.print(F("  ")); display.print(F(NETWORK_SSID));
 	display.display();
@@ -157,10 +153,12 @@ void loop() {
 //		}
 
 		// Publish sensor data to the Adafruit MQTT server
-		Serial.println(F("Sending sensor values..."));
-		if (!temperatureC.publish(temp.temperature)) Serial.println(F("Publishing temperature (C) failed!"));
-		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature))) Serial.println(F("Publishing temperature (F) failed!"));
-		if (!humidityTopic.publish(humidity.relative_humidity)) Serial.println(F("Publishing humidity failed!"));
+		if (!temperatureC.publish(temp.temperature))
+			Serial.println(F("Publishing temperature (C) failed!"));
+		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature)))
+			Serial.println(F("Publishing temperature (F) failed!"));
+		if (!humidityTopic.publish(humidity.relative_humidity))
+			Serial.println(F("Publishing humidity failed!"));
 	}
 }
 
