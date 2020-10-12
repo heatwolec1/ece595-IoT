@@ -38,9 +38,20 @@ void setup() {
 	display.setTextSize(2);
 	display.setTextColor(SSD1306_WHITE);
 	display.setCursor(0, 0);
+	display.cp437(true);
 }
 
 void loop() {
+	// do a quick screen test
+	for (int16_t row=0; row<SCREEN_HEIGHT; row=row+2) {
+		for (int16_t column=0; column<SCREEN_WIDTH; column=column+2) {
+			display.drawPixel(column, row, SSD1306_WHITE);
+			display.display();
+			delay(50);
+		}
+	}
+	display.clearDisplay();
+	delay(1000);
 }
 
 void fatalHandler() {
