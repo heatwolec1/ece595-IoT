@@ -45,7 +45,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
 	OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);	// OLED screen object
 
 // SHTC3 sensor
-#define MEASUREMENT_INTERVAL 10000			// interval between measurements, in milliseconds
+#define MEASUREMENT_INTERVAL 5000			// interval between measurements, in milliseconds
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
 sensors_event_t humidity, temp;				// sensor value objects
 
@@ -78,9 +78,9 @@ void setup() {
 
 	// Try to open a serial connection
 	// don't proceed until it is successful
-//	Serial.begin(115200);
-//	while (!Serial)
-//		delay(10);     // 10 ms is short enough that delay function isn't problematic
+	Serial.begin(115200);
+	while (!Serial)
+		delay(10);     // 10 ms is short enough that delay function isn't problematic
 //	Serial.print("# SHTC3 data logging\n");
 
 	// Initialize the display
@@ -157,9 +157,10 @@ void loop() {
 //		}
 
 		// Publish sensor data to the Adafruit MQTT server
-		temperatureC.publish(temp.temperature);
-		temperatureF.publish(celsiusToFahrenheit(temp.temperature));
-		humidityTopic.publish(humidity.relative_humidity);
+		Serial.println(F("Sending sensor values..."));
+		if (!temperatureC.publish(temp.temperature)) Serial.println(F("Publishing temperature (C) failed!"));
+		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature))) Serial.println(F("Publishing temperature (F) failed!"));
+		if (!humidityTopic.publish(humidity.relative_humidity)) Serial.println(F("Publishing humidity failed!"));
 	}
 }
 
