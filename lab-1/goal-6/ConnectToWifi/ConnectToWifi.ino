@@ -10,12 +10,23 @@
 #include <WiFi.h>
 #include <Wire.h>
 
-// Wifi constants
+// Wifi globals
 #define NETWORK_SSID     "Cisco04646"
 #define NETWORK_PASSWORD "your_network_password"
 IPAddress local_IP(192, 168, 1, 140);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
+
+// OLED screen globals
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_MOSI  18
+#define OLED_CLK    5
+#define OLED_DC    21
+#define OLED_CS    17
+#define OLED_RESET  4
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
+  OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
 void setup() {
 }
