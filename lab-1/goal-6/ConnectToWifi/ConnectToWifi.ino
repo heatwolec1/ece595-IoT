@@ -29,8 +29,15 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
 	OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
 void setup() {
-	// Initialize the display, calling the fatal routine if it fails
+	// Initialize error handling pin
+	pinMode(LED_BUILTIN, OUTPUT);
+
+	// Initialize the display
 	if (!display.begin(SSD1306_SWITCHCAPVCC)) fatalHandler();
+	display.clearDisplay();
+	display.setTextSize(2);
+	display.setTextColor(SSD1306_WHITE);
+	display.setCursor(0, 0);
 }
 
 void loop() {
