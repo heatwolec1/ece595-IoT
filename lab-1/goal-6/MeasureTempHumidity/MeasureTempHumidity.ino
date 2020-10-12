@@ -13,20 +13,25 @@
 
 #include "Adafruit_SHTC3.h"
 #include "WiFi.h"
+#include "WiFiUdp.h"
 #include "Wire.h"
 
 // Globals
 #define NETWORK_SSID     "Cisco04646"
-#define NETWORK_PASSWORD "your_password_here"
-IPAddress local_IP(192, 168, 1, 140);
+#define NETWORK_PASSWORD ""
+#define NODE_RED_HOST_PORT 12345					// Port on Node-RED server listening for messages
+IPAddress NODE_RED_HOST_IP(192, 168, 1, 112);	// IP address of the Node-RED server
+IPAddress local_IP(192, 168, 1, 140);			// IP address of the microcontroller
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
+WiFiUDP udp;	// the UDP library class object
 
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
 sensors_event_t humidity, temp;				// sensor value objects
 
 unsigned long prevMillis, curMillis;		// timer values for creating delays
 String csvOutput = "";						// final data output
+char csvOutputChar[20];
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
@@ -54,6 +59,9 @@ void setup() {
 		delay(10);     // 10 ms is short enough that delay function isn't problematic
 	}
 
+	// Open UDP transfer buffer
+	udp.begin(local_IP, NODE_RED_HOST_PORT);
+
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
 	if (! shtc3.begin()) {
@@ -78,8 +86,16 @@ void loop() {
 		// Output the sensor readings in the CSV format
 		csvOutput = String(temp.temperature, 2) + ","
 			+ String(celsiusToFahrenheit(temp.temperature), 2) + ","
-			+ String(humidity.relative_humidity, 2) + "\n";
-		Serial.print(csvOutput);
+			+ String(humidity.relative_humidity, 2);
+		Serial.print(csvOutput + "\n");
+
+		// If there is a wifi connection, send the data wirelessly also
+		if (WiFi.status() == WL_CONNECTED) {
+			csvOutput.toCharArray(csvOutputChar, csvOutput.length());
+			udp.beginPacket(NODE_RED_HOST_IP, NODE_RED_HOST_PORT);
+			udp.printf(csvOutputChar);
+			udp.endPacket();
+		}
 	}
 }
 
