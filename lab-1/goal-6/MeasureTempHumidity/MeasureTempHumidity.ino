@@ -80,7 +80,7 @@ void setup() {
 	// don't proceed until it is successful
 	if (!WiFi.config(local_IP, gateway, subnet)) fatalHandler();
 	display.println(F("Connecting to:"));
-	display.print(F("    ")); display.print(F(NETWORK_SSID));
+	display.print(F("  ")); display.print(F(NETWORK_SSID));
 	display.display();
 	WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
 	while (WiFi.status() != WL_CONNECTED) {
@@ -93,7 +93,7 @@ void setup() {
 	display.clearDisplay(); display.setCursor(0, 0);
 	display.println(F("WiFi connected!"));
 	display.println(F("IP address:"));
-	display.print(F("    ")); display.println(WiFi.localIP());
+	display.print(F("  ")); display.println(WiFi.localIP());
 	display.display();
 
 	// Open UDP transfer buffer
@@ -110,8 +110,9 @@ void setup() {
 
 	// Print out the CSV logging format (timestamps will be added in Node-RED)
 	//Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
+	display.println();
 	display.println("CSV format:");
-	display.print(F("    ")); display.println("tempC,tempF,humidity");
+	display.print(F("  ")); display.println("tempC,tempF,humid");
 	display.display();
 }
 
