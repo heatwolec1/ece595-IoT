@@ -4,6 +4,12 @@
  * status messages to an SSD1306 OLED screen.
  */
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <SPI.h>
+#include <WiFi.h>
+#include <Wire.h>
+
 void setup() {
 }
 
