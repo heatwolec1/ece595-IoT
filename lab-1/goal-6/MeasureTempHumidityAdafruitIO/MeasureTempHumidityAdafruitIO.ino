@@ -42,7 +42,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
 	OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);	// OLED screen object
 
 // SHTC3 sensor
-#define MEASUREMENT_INTERVAL 5000			// interval between measurements, in milliseconds
+#define MEASUREMENT_INTERVAL 10000			// interval between measurements, in milliseconds
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
 sensors_event_t humidity, temp;				// sensor value objects
 
