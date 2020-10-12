@@ -64,3 +64,13 @@ void loop() {
 	}
 }
 
+void fatalHandler() {
+	// Infinitely loop, flashing the built-in led
+	while (true) {
+		digitalWrite(LED_BUILTIN, HIGH);
+		delay(50);	// looping here infinitely, so using a delay doesn't affect anything significant
+		digitalWrite(LED_BUILTIN, LOW);
+		delay(50);
+	}
+}
+
