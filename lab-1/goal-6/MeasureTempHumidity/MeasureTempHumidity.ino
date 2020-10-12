@@ -12,12 +12,20 @@
 */
 
 #include "Adafruit_SHTC3.h"
+#include "WiFi.h"
 #include "Wire.h"
 
 // Globals
+#define NETWORK_SSID     "Cisco04646"
+#define NETWORK_PASSWORD "your_password_here"
+IPAddress local_IP(192, 168, 1, 140);
+IPAddress gateway(192, 168, 1, 1);
+IPAddress subnet(255, 255, 255, 0);
+
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
-unsigned long prevMillis, curMillis;		// timer values for creating delays
 sensors_event_t humidity, temp;				// sensor value objects
+
+unsigned long prevMillis, curMillis;		// timer values for creating delays
 String csvOutput = "";						// final data output
 
 float celsiusToFahrenheit(float tempC) {
@@ -25,6 +33,9 @@ float celsiusToFahrenheit(float tempC) {
 }
 
 void setup() {
+	// Initialize error handling pin
+	pinMode(LED_BUILTIN, OUTPUT);
+
 	// Initialize timer check previous value
 	prevMillis = 0;
 
@@ -34,6 +45,14 @@ void setup() {
 	while (!Serial)
 		delay(10);     // 10 ms is short enough that delay function isn't problematic
 	Serial.print("# SHTC3 data logging\n");
+
+	// Try to open a wifi connection
+	// don't proceed until it is successful
+	if (!WiFi.config(local_IP, gateway, subnet)) fatalHandler();
+	WiFi.begin(NETWORK_SSID, NETWORK_PASSWORD);
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(10);     // 10 ms is short enough that delay function isn't problematic
+	}
 
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
