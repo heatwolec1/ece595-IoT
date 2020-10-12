@@ -26,11 +26,23 @@ IPAddress subnet(255, 255, 255, 0);
 #define OLED_CS    17
 #define OLED_RESET  4
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
-  OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
+	OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);
 
 void setup() {
+	// Initialize the display, calling the fatal routine if it fails
+	if (!display.begin(SSD1306_SWITCHCAPVCC)) fatalHandler();
 }
 
 void loop() {
+}
+
+void fatalHandler() {
+	// Infinitely loop, flashing the built-in led
+	while (true) {
+		digitalWrite(LED_BUILTIN, HIGH);
+		delay(50);	// looping here infinitely, so using a delay doesn't affect anything significant
+		digitalWrite(LED_BUILTIN, LOW);
+		delay(50);
+	}
 }
 
