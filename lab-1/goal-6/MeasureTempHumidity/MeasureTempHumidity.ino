@@ -11,24 +11,41 @@
  * OF THE LINE UNLESS THE LINE CONTAINS SENSOR DATA!!!
 */
 
+#include "Adafruit_GFX.h"
 #include "Adafruit_SHTC3.h"
+#include "Adafruit_SSD1306.h"
+#include "SPI.h"
 #include "WiFi.h"
 #include "WiFiUdp.h"
 #include "Wire.h"
 
 // Globals
+// Wifi
 #define NETWORK_SSID     "Cisco04646"
 #define NETWORK_PASSWORD ""
-#define NODE_RED_HOST_PORT 12345					// Port on Node-RED server listening for messages
+#define NODE_RED_HOST_PORT 12345				// Port on Node-RED server listening for messages
 IPAddress NODE_RED_HOST_IP(192, 168, 1, 112);	// IP address of the Node-RED server
 IPAddress local_IP(192, 168, 1, 140);			// IP address of the microcontroller
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 WiFiUDP udp;	// the UDP library class object
 
+// OLED screen
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_MOSI  18	// start OLED screen pin definitions
+#define OLED_CLK    5
+#define OLED_DC    21
+#define OLED_CS    17
+#define OLED_RESET  4	// end OLED screen pin definitions
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
+	OLED_MOSI, OLED_CLK, OLED_DC, OLED_RESET, OLED_CS);	// OLED screen object
+
+// SHTC3 sensor
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
 sensors_event_t humidity, temp;				// sensor value objects
 
+// Other
 unsigned long prevMillis, curMillis;		// timer values for creating delays
 String csvOutput = "";						// final data output
 char csvOutputChar[20];
