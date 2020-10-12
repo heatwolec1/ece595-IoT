@@ -12,6 +12,8 @@
 */
 
 #include "Adafruit_GFX.h"
+#include "Adafruit_MQTT.h"
+#include "Adafruit_MQTT_Client.h"
 #include "Adafruit_SHTC3.h"
 #include "Adafruit_SSD1306.h"
 #include "SPI.h"
@@ -29,6 +31,7 @@ IPAddress local_IP(192, 168, 1, 140);			// IP address of the microcontroller
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 WiFiUDP udp;	// the UDP library class object
+WiFiClient client;	// client object to connect to adafruit's MQTT server
 
 // OLED screen
 #define SCREEN_WIDTH 128
@@ -44,6 +47,17 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT,
 // SHTC3 sensor
 Adafruit_SHTC3 shtc3 = Adafruit_SHTC3();	// sensor object
 sensors_event_t humidity, temp;				// sensor value objects
+
+// Adafruit.io setup
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883
+#define AIO_USERNAME    "heatwolec1"
+#define AIO_KEY         ""
+Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+// feeds:
+Adafruit_MQTT_Publish temperatureC = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature");
+Adafruit_MQTT_Publish temperatureF = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature-f");
+Adafruit_MQTT_Publish humidityTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/humidity");
 
 // Other
 unsigned long prevMillis, curMillis;		// timer values for creating delays
@@ -117,6 +131,10 @@ void setup() {
 }
 
 void loop() {
+	// Check connection to MQTT server
+	// If disconnected, try to connect
+	MQTT_connect();
+
 	// Update timer check current value
 	curMillis = millis();
 	if (curMillis-prevMillis >= 1000) {
@@ -136,7 +154,38 @@ void loop() {
 			udp.printf(csvOutputChar);
 			udp.endPacket();
 		}
+
+		// Publish sensor data to the Adafruit MQTT server
+		temperatureC.publish(temp.temperature);
+		temperatureF.publish(celsiusToFahrenheit(temp.temperature));
+		humidityTopic.publish(humidity.relative_humidity);
 	}
+}
+
+void MQTT_connect() {
+	// This function is borrowed from the ESP8266 MQTT example provided by
+	// Adafruit in the Adafruit_MQTT library.
+	int8_t ret;
+
+	// Stop if already connected.
+	if (mqtt.connected()) {
+		return;
+	}
+
+	Serial.print("Connecting to MQTT... ");
+
+	uint8_t retries = 3;
+	while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
+		Serial.println(mqtt.connectErrorString(ret));
+		Serial.println("Retrying MQTT connection in 5 seconds...");
+		mqtt.disconnect();
+		delay(5000);  // wait 5 seconds
+		if (--retries == 0) {
+			// basically die and wait for WDT to reset me
+			while (1);
+		}
+	}
+	Serial.println("MQTT Connected!");
 }
 
 void fatalHandler() {
