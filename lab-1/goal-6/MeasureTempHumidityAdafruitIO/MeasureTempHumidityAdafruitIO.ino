@@ -144,10 +144,7 @@ void MQTT_connect() {
 		Serial.println("Retrying MQTT connection in 5 seconds...");
 		mqtt.disconnect();
 		delay(5000);  // wait 5 seconds
-		if (--retries == 0) {
-			// basically die and wait for WDT to reset me
-			while (1);
-		}
+		if (--retries == 0) fatalHandler();
 	}
 	Serial.println("MQTT Connected!");
 }
