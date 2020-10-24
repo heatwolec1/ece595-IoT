@@ -52,8 +52,6 @@ Adafruit_MQTT_Publish humidityTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME 
 
 // Other
 unsigned long prevMillis, curMillis;		// timer values for creating delays
-String csvOutput = "";						// final data output
-char csvOutputChar[20];
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
@@ -120,21 +118,8 @@ void loop() {
 		// Update timer check previous value
 		prevMillis = curMillis;
 
-		// Read in fresh data from the sensor
+		// Read in fresh data from the sensor and publish data to Adafruit MQTT server
 		shtc3.getEvent(&humidity, &temp);
-		csvOutput = String(temp.temperature, 2) + ","
-			+ String(celsiusToFahrenheit(temp.temperature), 2) + ","
-			+ String(humidity.relative_humidity, 2);
-
-		// If there is a wifi connection, send the data in UDP packets
-//		if (WiFi.status() == WL_CONNECTED) {
-//			csvOutput.toCharArray(csvOutputChar, csvOutput.length());
-//			udp.beginPacket(NODE_RED_HOST_IP, NODE_RED_HOST_PORT);
-//			udp.printf(csvOutputChar);
-//			udp.endPacket();
-//		}
-
-		// Publish sensor data to the Adafruit MQTT server
 		if (!temperatureC.publish(temp.temperature))
 			Serial.println(F("Publishing temperature (C) failed!"));
 		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature)))
