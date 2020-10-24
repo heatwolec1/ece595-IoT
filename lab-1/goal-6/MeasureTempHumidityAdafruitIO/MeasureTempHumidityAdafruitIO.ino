@@ -12,7 +12,6 @@
 #include "Adafruit_SSD1306.h"
 #include "SPI.h"
 #include "WiFi.h"
-//#include "WiFiUdp.h"
 #include "Wire.h"
 
 // Globals
@@ -72,7 +71,6 @@ void setup() {
 	Serial.begin(115200);
 	while (!Serial)
 		delay(10);     // 10 ms is short enough that delay function isn't problematic
-//	Serial.print("# SHTC3 data logging\n");
 
 	// Initialize the display
 	if (!display.begin(SSD1306_SWITCHCAPVCC)) fatalHandler();
@@ -101,24 +99,14 @@ void setup() {
 	display.print(F("  ")); display.println(WiFi.localIP());
 	display.display();
 
-	// Open UDP transfer buffer
-	//udp.begin(WiFi.localIP(), NODE_RED_HOST_PORT);
-
 	// Try to connect to the SHTC3 sensor
 	// don't proceed unless it is successful
-	if (! shtc3.begin()) {
-		//Serial.print("# Couldn't find SHTC3\n");
+	if (!shtc3.begin()) {
 		display.println("Couldn't find SHTC3");
 		display.display();
 		while (1) delay(1);	// infinite loop, delay isn't stopping anything else from occurring
 	}
 
-	// Print out the CSV logging format (timestamps will be added in Node-RED)
-	//Serial.print("# CSV format:\n#\ttempC,tempF,humidity");
-	display.println();
-	display.println("CSV format:");
-	display.print(F("  ")); display.println("tempC,tempF,humid");
-	display.display();
 }
 
 void loop() {
