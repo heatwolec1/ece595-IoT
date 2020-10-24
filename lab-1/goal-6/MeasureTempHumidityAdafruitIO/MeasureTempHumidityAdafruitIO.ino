@@ -1,14 +1,8 @@
 /*
  * This code is nearly identical to the example code provided by Adafruit for the
- * SHTC3 sensor. My modications include printing the temperature in Fahrenheit,
- * reformatting the text being printed to serial, and replacing the delay function
+ * SHTC3 sensor. My modications include calculating the temperature in Fahrenheit,
+ * sending the data to the adafruit.io servers, and replacing the delay function
  * calls with system time differences.
- *
- * Rather than displaying the data on the Arduino serial monitor, I will be using
- * Node-RED to listen for and display the data.
- *
- * ALL MESSAGES BEING SENT OUT OVER SERIAL SHOULD HAVE A "#" AS THE FIRST CHARACTER
- * OF THE LINE UNLESS THE LINE CONTAINS SENSOR DATA!!!
 */
 
 #include "Adafruit_GFX.h"
