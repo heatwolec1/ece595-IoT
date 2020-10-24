@@ -18,9 +18,6 @@
 // Wifi
 #define NETWORK_SSID     "Cisco04646"
 #define NETWORK_PASSWORD ""
-#define NODE_RED_HOST_PORT 12345				// Port on Node-RED server listening for messages
-//IPAddress NODE_RED_HOST_IP(192, 168, 1, 112);	// IP address of the Node-RED server
-//WiFiUDP udp;	// the UDP library class object
 WiFiClient client;	// client object to connect to adafruit's MQTT server
 
 // OLED screen
