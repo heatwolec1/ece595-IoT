@@ -21,8 +21,11 @@
 WiFiClient client;	// client object to connect to adafruit's MQTT server
 
 // OLED screen
+#define SCREEN_UPDATE_INTERVAL 1000	// interval between display text updates, in milliseconds
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+#define CHARACTER_WIDTH 6
+#define CHARACTER_HEIGHT 8
 #define OLED_MOSI  18	// start OLED screen pin definitions
 #define OLED_CLK    5
 #define OLED_DC    21
@@ -48,7 +51,8 @@ Adafruit_MQTT_Publish temperatureF = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "
 Adafruit_MQTT_Publish humidityTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/humidity");
 
 // Other
-unsigned long prevMillis, curMillis;		// timer values for creating delays
+#define CONNECTION_TEST_INTERVAL 1000		// interval between wifi and mqtt connection tests, in milliseconds
+unsigned long prevMillisMeasurement, prevMillisConnectionTest, prevMillisScreenUpdate, curMillis;		// timer values for creating delays
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
@@ -58,8 +62,10 @@ void setup() {
 	// Initialize error handling pin
 	pinMode(LED_BUILTIN, OUTPUT);
 
-	// Initialize timer check previous value
-	prevMillis = 0;
+	// Initialize timer check previous values
+	prevMillisMeasurement = 0;
+	prevMillisConnectionTest = 0;
+	prevMillisScreenUpdate = 0;
 
 	// Try to open a serial connection
 	// don't proceed until it is successful
@@ -85,19 +91,26 @@ void setup() {
 }
 
 void loop() {
-	// Check WiFi connection
-	// If disconnected, try to connect
-	WiFi_connect();
-
-	// Check connection to MQTT server
-	// If disconnected, try to connect
-	MQTT_connect();
-
 	// Update timer check current value
 	curMillis = millis();
-	if (curMillis-prevMillis >= MEASUREMENT_INTERVAL) {
+
+	// Check connections
+	if (curMillis-prevMillisConnectionTest >= CONNECTION_TEST_INTERVAL) {
 		// Update timer check previous value
-		prevMillis = curMillis;
+		prevMillisConnectionTest = curMillis;
+
+		// Check connections
+		WiFi_connect();
+		MQTT_connect();
+
+		// This block took some time, update timer check current value again
+		curMillis = millis();
+	}
+
+	// Sensor value read/publish
+	if (curMillis-prevMillisMeasurement >= MEASUREMENT_INTERVAL) {
+		// Update timer check previous value
+		prevMillisMeasurement = curMillis;
 
 		// Read in fresh data from the sensor and publish data to Adafruit MQTT server
 		shtc3.getEvent(&humidity, &temp);
@@ -107,8 +120,20 @@ void loop() {
 			Serial.println(F("Publishing temperature (F) failed!"));
 		if (!humidityTopic.publish(humidity.relative_humidity))
 			Serial.println(F("Publishing humidity failed!"));
+
+		// This block took some time, update timer check current value again
+		curMillis = millis();
 	}
-	delay(1000);
+
+	// Update display text
+	if (curMillis-prevMillisScreenUpdate >= SCREEN_UPDATE_INTERVAL) {
+		// Update timer check previous value
+		prevMillisScreenUpdate = curMillis;
+
+		// This block took some time, update timer check current value again
+		curMillis = millis();
+	}
+
 }
 
 void WiFi_connect() {
@@ -131,14 +156,6 @@ void WiFi_connect() {
 		display.display();
 		delay(1000);	// delay is OK here since we can't do anything without a wifi connection
 	}
-
-	// Once connected, display connection info
-	display.clearDisplay(); display.setCursor(0, 0);
-	display.println(F("Network:"));
-	display.print(F("  ")); display.println(WiFi.SSID());
-	display.println(F("IP address:"));
-	display.print(F("  ")); display.println(WiFi.localIP());
-	display.display();
 }
 
 void MQTT_connect() {
@@ -162,6 +179,30 @@ void MQTT_connect() {
 		//if (--retries == 0) fatalHandler();
 	}
 	Serial.println("MQTT Connected!");
+}
+
+void screenUpdate() {
+	// Initialize display buffer
+	display.clearDisplay();
+	display.setCursor(0, 0);
+
+	// Add the current IP address to the display buffer
+	display.print(F("IP: ")); display.println(WiFi.localIP());
+
+	// Add the current temp and humidity (inside) to the display buffer
+	display.println();
+	display.print(F("Inside Temp: ")); display.println(temp.temperature);
+
+	// Add the current temp and humidity (outside) to the display buffer
+	display.println();
+	display.print(F("Outside Temp: ")); display.println();
+
+	// Add the fan status to the display buffer
+	display.println();
+	display.print(F("Fan Status: ")); display.println();
+
+	// Write display buffer to screen
+	display.display();
 }
 
 void fatalHandler() {
