@@ -49,10 +49,12 @@ Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO
 Adafruit_MQTT_Publish temperatureC = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature");
 Adafruit_MQTT_Publish temperatureF = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature-f");
 Adafruit_MQTT_Publish humidityTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/humidity");
+Adafruit_MQTT_Publish fanStateTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/fan-state");
 
 // Other
 #define CONNECTION_TEST_INTERVAL 1000		// interval between wifi and mqtt connection tests, in milliseconds
 unsigned long prevMillisMeasurement, prevMillisConnectionTest, prevMillisScreenUpdate, curMillis;		// timer values for creating delays
+boolean fanState = false;
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
@@ -121,6 +123,10 @@ void loop() {
 		if (!humidityTopic.publish(humidity.relative_humidity))
 			Serial.println(F("Publishing humidity failed!"));
 
+		// Publish fan state to Adafruit MQTT server
+		if (!fanStateTopic.publish(fanState))
+			Serial.println(F("Publishing fan state failed!"));
+
 		// This block took some time, update timer check current value again
 		curMillis = millis();
 	}
@@ -129,6 +135,9 @@ void loop() {
 	if (curMillis-prevMillisScreenUpdate >= SCREEN_UPDATE_INTERVAL) {
 		// Update timer check previous value
 		prevMillisScreenUpdate = curMillis;
+
+		// Update the display text
+		screenUpdate();
 
 		// This block took some time, update timer check current value again
 		curMillis = millis();
@@ -199,7 +208,7 @@ void screenUpdate() {
 
 	// Add the fan status to the display buffer
 	display.println();
-	display.print(F("Fan Status: ")); display.println();
+	display.print(F("Fan Status: ")); display.println(fanState ? "On" : "Off");
 
 	// Write display buffer to screen
 	display.display();
