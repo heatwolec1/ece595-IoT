@@ -81,9 +81,6 @@ void getOutsideWeather() {
 	if (clientOWM.println("Connection: close") == 0) return;
 	if (clientOWM.println() == 0) return;
 
-	// Stall until there is data to read
-	while (clientOWM.available() == 0) continue;
-
 	// Check HTTP status
 	char status[32] = {0};
 	clientOWM.readBytesUntil('\r', status, sizeof(status));
