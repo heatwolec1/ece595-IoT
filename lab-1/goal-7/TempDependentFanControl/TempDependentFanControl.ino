@@ -175,6 +175,7 @@ void loop() {
 
 		// Set fan state and publish to Adafruit MQTT server
 		fanState = setFanState(temp.temperature, outsideTemp);
+		digitalWrite(LED_BUILTIN, fanState);	// Set the fan to the determined fanState
 		if (!fanStateTopic.publish(fanState))
 			Serial.println(F("Publishing fan state failed!"));
 
