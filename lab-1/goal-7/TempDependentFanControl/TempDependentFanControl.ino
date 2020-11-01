@@ -60,6 +60,8 @@ Adafruit_MQTT_Publish fanStateTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME 
 WiFiClient clientOWM;		// client object to connect to openweathermap.org
 
 // Other
+#define DELTA_F_TO_DELTA_C 0.5555555		// 1 degree change in F is 0.5555555 degree change in C
+#define DELTA_C_TO_DELTA_F 1.8				// 1 degree change in C is 1.8 degree change in F
 #define CONNECTION_TEST_INTERVAL 1000		// interval between wifi and mqtt connection tests, in milliseconds
 unsigned long prevMillisMeasurement, prevMillisConnectionTest, prevMillisScreenUpdate, curMillis;		// timer values for creating delays
 float outsideTemp, outsideHumidity;
@@ -71,6 +73,7 @@ float celsiusToFahrenheit(float tempC) {
 
 boolean setFanState(float insideTemperature, float outsideTemperature) {
 	// TODO: move cold air in if insideTemperature is above some threshold, otherwise move warm air in
+	insideTemperature -= 3.5 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
 	return (insideTemperature > outsideTemperature);
 }
 
