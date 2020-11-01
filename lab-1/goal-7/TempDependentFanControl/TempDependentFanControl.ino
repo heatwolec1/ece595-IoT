@@ -10,6 +10,7 @@
 #include "Adafruit_MQTT_Client.h"
 #include "Adafruit_SHTC3.h"
 #include "Adafruit_SSD1306.h"
+#include "ArduinoJson.h"
 #include "SPI.h"
 #include "WiFi.h"
 #include "Wire.h"
@@ -18,7 +19,6 @@
 // Wifi
 #define NETWORK_SSID     "Cisco04646"
 #define NETWORK_PASSWORD ""
-WiFiClient client;	// client object to connect to adafruit's MQTT server
 
 // OLED screen
 #define SCREEN_UPDATE_INTERVAL 1000	// interval between display text updates, in milliseconds
@@ -44,12 +44,20 @@ sensors_event_t humidity, temp;				// sensor value objects
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "heatwolec1"
 #define AIO_KEY         ""
-Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+WiFiClient clientAdafruit;	// client object to connect to adafruit's MQTT server
+Adafruit_MQTT_Client mqtt(&clientAdafruit, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 // feeds:
 Adafruit_MQTT_Publish temperatureC = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature");
 Adafruit_MQTT_Publish temperatureF = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/temperature-f");
 Adafruit_MQTT_Publish humidityTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/humidity");
 Adafruit_MQTT_Publish fanStateTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME "/feeds/fan-state");
+
+// OpenWeatherMap
+#define OWM_SERVER		"api.openweathermap.org"
+#define OWM_SERVERPORT	80
+#define OWM_KEY			""
+#define ZIP				45419
+WiFiClient clientOWM;		// client object to connect to openweathermap.org
 
 // Other
 #define CONNECTION_TEST_INTERVAL 1000		// interval between wifi and mqtt connection tests, in milliseconds
@@ -66,6 +74,39 @@ boolean setFanState(float insideTemperature, float outsideTemperature) {
 	return (insideTemperature > outsideTemperature);
 }
 
+void getOutsideWeather() {
+	// Send HTTP request to OWM. If any print fails, use the old data until we try again
+	if (clientOWM.println("GET /data/2.5/weather?zip=45419&units=metric&appid=" OWM_KEY " HTTP/1.1") == 0) return;
+	if (clientOWM.println("Host: " OWM_SERVER) == 0) return;
+	if (clientOWM.println("Connection: close") == 0) return;
+	if (clientOWM.println() == 0) return;
+
+	// Stall until there is data to read
+	while (clientOWM.available() == 0) continue;
+
+	// Check HTTP status
+	char status[32] = {0};
+	clientOWM.readBytesUntil('\r', status, sizeof(status));
+	if (strcmp(status, "HTTP/1.1 200 OK") != 0) return;	// error, use the old data until we try again
+
+	// Skip HTTP headers
+	char endOfHeaders[] = "\r\n\r\n";
+	if (!clientOWM.find(endOfHeaders)) return;	// error, use the old data until we try again
+
+	// Allocate space for the JSON data
+	const size_t capacity = 915;	// value obtained from ArduinoJson assistant
+	DynamicJsonDocument weatherDoc(capacity);
+
+	// Parse temperature and humidity from the JSON data
+	DeserializationError error = deserializeJson(weatherDoc, clientOWM);
+	if (error) return;	// error, use the old data until we try again
+	outsideTemp = weatherDoc["main"]["temp"];
+	outsideHumidity = weatherDoc["main"]["humidity"];
+
+	// Disconnect from OWM
+	clientOWM.stop();
+}
+
 void setup() {
 	// Initialize error handling pin
 	pinMode(LED_BUILTIN, OUTPUT);
@@ -78,8 +119,7 @@ void setup() {
 	// Try to open a serial connection
 	// don't proceed until it is successful
 	Serial.begin(115200);
-	while (!Serial)
-		delay(10);     // 10 ms is short enough that delay function isn't problematic
+	while (!Serial) continue;
 
 	// Initialize the display
 	if (!display.begin(SSD1306_SWITCHCAPVCC)) fatalHandler();
@@ -120,7 +160,7 @@ void loop() {
 		// Update timer check previous value
 		prevMillisMeasurement = curMillis;
 
-		// Read in fresh data from the sensor and publish data to Adafruit MQTT server
+		// Read in fresh data from the sensor and publish to Adafruit MQTT server
 		shtc3.getEvent(&humidity, &temp);
 		if (!temperatureC.publish(temp.temperature))
 			Serial.println(F("Publishing temperature (C) failed!"));
@@ -130,8 +170,8 @@ void loop() {
 			Serial.println(F("Publishing humidity failed!"));
 
 		// Read the local outside weather measurements
-		outsideTemp = 1234;
-		outsideHumidity = 7890;
+		OWM_connect();
+		getOutsideWeather();
 
 		// Set fan state and publish to Adafruit MQTT server
 		fanState = setFanState(temp.temperature, outsideTemp);
@@ -157,12 +197,9 @@ void loop() {
 }
 
 void WiFi_connect() {
-
 	// Stop if already connected
 	int status = WiFi.status();
-	if (status == WL_CONNECTED) {
-		return;
-	}
+	if (status == WL_CONNECTED) return;
 
 	// Try to open a wifi connection
 	// don't proceed until it is successful
@@ -181,24 +218,30 @@ void WiFi_connect() {
 void MQTT_connect() {
 	// This function is borrowed from the ESP8266 MQTT example provided by
 	// Adafruit in the Adafruit_MQTT library.
-	int8_t ret;
-
 	// Stop if already connected.
 	if (mqtt.connected()) {
 		return;
 	}
 
-	Serial.print("Connecting to MQTT... ");
-
 	uint8_t retries = 3;
-	while ((ret = mqtt.connect()) != 0) { // connect will return 0 for connected
-		Serial.println(mqtt.connectErrorString(ret));
-		Serial.println("Retrying MQTT connection in 5 seconds...");
+	while (mqtt.connect() != 0) { // connect will return 0 for connected
 		mqtt.disconnect();
 		delay(5000);  // wait 5 seconds
 		//if (--retries == 0) fatalHandler();
 	}
-	Serial.println("MQTT Connected!");
+}
+
+void OWM_connect() {
+	// Stop if already connected
+	int status = clientOWM.connected();
+	if (status) return;
+
+	// Try to connect to openweathermap.org
+	// don't proceed until it is successful
+	while (!status) {
+		status = clientOWM.connect(OWM_SERVER, OWM_SERVERPORT);
+		delay(100);
+	}
 }
 
 void screenUpdate() {
