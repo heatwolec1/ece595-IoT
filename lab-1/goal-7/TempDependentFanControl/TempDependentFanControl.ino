@@ -77,6 +77,11 @@ boolean setFanState(float insideTemperature, float outsideTemperature) {
 }
 
 void getOutsideWeather() {
+	/*
+	 * This code modified from ArduinoJson's JsonHttpClient.ino sketch
+	 * https://arduinojson.org/v6/example/http-client/
+	*/
+
 	// Send HTTP request to OWM. If any print fails, use the old data until we try again
 	if (clientOWM.println("GET /data/2.5/weather?zip=45419&units=metric&appid=" OWM_KEY " HTTP/1.1") == 0) return;
 	if (clientOWM.println("Host: " OWM_SERVER) == 0) return;
