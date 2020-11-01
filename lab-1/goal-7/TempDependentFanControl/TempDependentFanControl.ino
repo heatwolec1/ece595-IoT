@@ -54,10 +54,16 @@ Adafruit_MQTT_Publish fanStateTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME 
 // Other
 #define CONNECTION_TEST_INTERVAL 1000		// interval between wifi and mqtt connection tests, in milliseconds
 unsigned long prevMillisMeasurement, prevMillisConnectionTest, prevMillisScreenUpdate, curMillis;		// timer values for creating delays
+float outsideTemp, outsideHumidity;
 boolean fanState = false;
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
+}
+
+boolean setFanState(float insideTemperature, float outsideTemperature) {
+	// TODO: move cold air in if insideTemperature is above some threshold, otherwise move warm air in
+	return (insideTemperature > outsideTemperature);
 }
 
 void setup() {
@@ -123,7 +129,12 @@ void loop() {
 		if (!humidityTopic.publish(humidity.relative_humidity))
 			Serial.println(F("Publishing humidity failed!"));
 
-		// Publish fan state to Adafruit MQTT server
+		// Read the local outside weather measurements
+		outsideTemp = 1234;
+		outsideHumidity = 7890;
+
+		// Set fan state and publish to Adafruit MQTT server
+		fanState = setFanState(temp.temperature, outsideTemp);
 		if (!fanStateTopic.publish(fanState))
 			Serial.println(F("Publishing fan state failed!"));
 
@@ -204,7 +215,7 @@ void screenUpdate() {
 
 	// Add the current temp and humidity (outside) to the display buffer
 	display.println();
-	display.print(F("Outside Temp: ")); display.println();
+	display.print(F("Outside Temp: ")); display.println(outsideTemp);
 
 	// Add the fan status to the display buffer
 	display.println();
