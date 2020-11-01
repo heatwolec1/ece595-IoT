@@ -73,7 +73,6 @@ float celsiusToFahrenheit(float tempC) {
 
 boolean setFanState(float insideTemperature, float outsideTemperature) {
 	// TODO: move cold air in if insideTemperature is above some threshold, otherwise move warm air in
-	insideTemperature -= 3.5 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
 	return (insideTemperature > outsideTemperature);
 }
 
@@ -162,6 +161,7 @@ void loop() {
 
 		// Read in fresh data from the sensor and publish to Adafruit MQTT server
 		shtc3.getEvent(&humidity, &temp);
+		temp.temperature -= 3.5 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
 		if (!temperatureC.publish(temp.temperature))
 			Serial.println(F("Publishing temperature (C) failed!"));
 		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature)))
