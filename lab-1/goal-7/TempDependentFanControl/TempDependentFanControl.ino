@@ -59,21 +59,37 @@ Adafruit_MQTT_Publish fanStateTopic = Adafruit_MQTT_Publish(&mqtt, AIO_USERNAME 
 #define ZIP				45419
 WiFiClient clientOWM;		// client object to connect to openweathermap.org
 
+// Fan/Relay
+#define FAN_RELAY_SET_PIN		12
+#define FAN_RELAY_UNSET_PIN		27
+#define FAN_RELAY_PULSE_LENGTH	20	// time in milliseconds, minimum is 10
+boolean fanState = false;
+
 // Other
 #define DELTA_F_TO_DELTA_C 0.5555555		// 1 degree change in F is 0.5555555 degree change in C
 #define DELTA_C_TO_DELTA_F 1.8				// 1 degree change in C is 1.8 degree change in F
 #define CONNECTION_TEST_INTERVAL 1000		// interval between wifi and mqtt connection tests, in milliseconds
 unsigned long prevMillisMeasurement, prevMillisConnectionTest, prevMillisScreenUpdate, curMillis;		// timer values for creating delays
 float outsideTemp, outsideHumidity;
-boolean fanState = false;
 
 float celsiusToFahrenheit(float tempC) {
 	return (tempC * 1.8) + 32;
 }
 
-boolean setFanState(float insideTemperature, float outsideTemperature) {
+void setFanState(float insideTemperature, float outsideTemperature) {
+	// Save current fan state and determine new fan state
+	boolean prevFanState = fanState;
 	// TODO: move cold air in if insideTemperature is above some threshold, otherwise move warm air in
-	return (insideTemperature > outsideTemperature);
+	fanState = (insideTemperature > outsideTemperature);
+
+	// If no state change, exit
+	if (fanState == prevFanState) return;
+
+	// Apply the state change
+	int relayTriggerPin = fanState ? FAN_RELAY_SET_PIN : FAN_RELAY_UNSET_PIN;
+	digitalWrite(relayTriggerPin, HIGH);
+	delay(FAN_RELAY_PULSE_LENGTH);
+	digitalWrite(relayTriggerPin, LOW);
 }
 
 void getOutsideWeather() {
@@ -112,8 +128,15 @@ void getOutsideWeather() {
 }
 
 void setup() {
-	// Initialize error handling pin
-	pinMode(LED_BUILTIN, OUTPUT);
+	// Initialize pins
+	pinMode(LED_BUILTIN, OUTPUT);			// error handling
+	pinMode(FAN_RELAY_SET_PIN, OUTPUT);		// latching relay set
+	pinMode(FAN_RELAY_UNSET_PIN, OUTPUT);	// latching relay unset
+
+	// Make sure the relay is off to start
+	digitalWrite(FAN_RELAY_UNSET_PIN, HIGH);
+	delay(FAN_RELAY_PULSE_LENGTH);
+	digitalWrite(FAN_RELAY_UNSET_PIN, LOW);
 
 	// Initialize timer check previous values
 	prevMillisMeasurement = 0;
@@ -166,7 +189,7 @@ void loop() {
 
 		// Read in fresh data from the sensor and publish to Adafruit MQTT server
 		shtc3.getEvent(&humidity, &temp);
-		temp.temperature -= 3.5 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
+		temp.temperature -= 3.0 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
 		if (!temperatureC.publish(temp.temperature))
 			Serial.println(F("Publishing temperature (C) failed!"));
 		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature)))
@@ -179,8 +202,7 @@ void loop() {
 		getOutsideWeather();
 
 		// Set fan state and publish to Adafruit MQTT server
-		fanState = setFanState(temp.temperature, outsideTemp);
-		digitalWrite(LED_BUILTIN, fanState);	// Set the fan to the determined fanState
+		setFanState(temp.temperature, outsideTemp);
 		if (!fanStateTopic.publish(fanState))
 			Serial.println(F("Publishing fan state failed!"));
 
