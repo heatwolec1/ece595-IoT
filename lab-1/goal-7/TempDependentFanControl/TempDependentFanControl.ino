@@ -63,6 +63,7 @@ WiFiClient clientOWM;		// client object to connect to openweathermap.org
 #define FAN_RELAY_SET_PIN		12
 #define FAN_RELAY_UNSET_PIN		27
 #define FAN_RELAY_PULSE_LENGTH	20	// time in milliseconds, minimum is 10
+#define INSIDE_TEMP_THRESHOLD	22	// threshold for inside being considered 'hot', in degrees Celsius
 boolean fanState = false;
 
 // Other
@@ -79,8 +80,8 @@ float celsiusToFahrenheit(float tempC) {
 void setFanState(float insideTemperature, float outsideTemperature) {
 	// Save current fan state and determine new fan state
 	boolean prevFanState = fanState;
-	// TODO: move cold air in if insideTemperature is above some threshold, otherwise move warm air in
-	fanState = (insideTemperature > outsideTemperature);
+	if (insideTemperature >= INSIDE_TEMP_THRESHOLD) fanState = (insideTemperature > outsideTemperature);	// if hot inside, turn fan on if colder outside
+	else fanState = (insideTemperature < outsideTemperature);	// if cold inside, turn fan on if hotter outside
 
 	// If no state change, exit
 	if (fanState == prevFanState) return;
@@ -189,7 +190,7 @@ void loop() {
 
 		// Read in fresh data from the sensor and publish to Adafruit MQTT server
 		shtc3.getEvent(&humidity, &temp);
-		temp.temperature -= 3.0 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
+		temp.temperature -= 4.0 * DELTA_F_TO_DELTA_C;	// adjust sensor reading to match apartment thermostat (higher since the electronics heat up)
 		if (!temperatureC.publish(temp.temperature))
 			Serial.println(F("Publishing temperature (C) failed!"));
 		if (!temperatureF.publish(celsiusToFahrenheit(temp.temperature)))
